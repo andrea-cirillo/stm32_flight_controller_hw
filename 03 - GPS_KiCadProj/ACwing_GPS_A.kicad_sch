@@ -5,7 +5,7 @@
   (paper "A4")
   (title_block
     (title "ACwing GPS rev A - GNSS + compass expansion for ACwing FC rev A")
-    (date "2026-10-19")
+    (date "2026-10-24")
     (rev "A")
     (company "ACwing - Andrea Cirillo")
     (comment 1 "30 x 30 mm, 2 layers, 1.0 mm; same 20 x 20 mm hole pattern as the flight controller")
@@ -1555,7 +1555,7 @@
       (effects
         (font
           (size 1.27 1.27)) hide))
-    (property "Note" "JST SH 1.0 mm 4-pin side entry, TOP side (rev A), right edge (mouth toward +X). From FC J3"
+    (property "Note" "JST SH 1.0 mm 4-pin side entry, TOP side, right edge at v = +3.6 (aligned with FC J3), mouth toward +X. From FC J3"
       (at 35.56 38.1 0)
       (effects
         (font
@@ -1664,7 +1664,7 @@
       (effects
         (font
           (size 1.27 1.27)) hide))
-    (property "Note" "JST SH 1.0 mm 4-pin side entry, TOP side (rev A), rear edge (mouth toward -Y). Optional pass-through (the flow board has its own FC port J4)"
+    (property "Note" "JST SH 1.0 mm 4-pin side entry, TOP side, rear edge (mouth toward -Y). Optional pass-through (the flow board has its own FC port J4)"
       (at 68.58 38.1 0)
       (effects
         (font

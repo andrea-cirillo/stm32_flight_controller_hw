@@ -1,6 +1,6 @@
 import pcbnew, sys, os, matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as MP
-b=pcbnew.LoadBoard(os.environ.get('PCB','/home/claude/outE/ACwing_FC_E.kicad_pcb')); OX,OY=150,100
+b=pcbnew.LoadBoard(os.environ.get('PCB','/home/claude/outE/DimaQuadFC_E.kicad_pcb')); OX,OY=150,100
 layers=sys.argv[1].split(',')   # e.g. F,In2
 out=sys.argv[2]; hl=sys.argv[3] if len(sys.argv)>3 else ''
 LM={'F':pcbnew.F_Cu,'B':pcbnew.B_Cu,'In1':pcbnew.In1_Cu,'In2':pcbnew.In2_Cu}

@@ -1,4 +1,4 @@
-# ACwing FC rev F - planes, fixed RF / LDO / sensor details, MCU ground, pogo stubs, GND fan-out.
+# DimaQuadFC rev F - planes, fixed RF / LDO / sensor details, MCU ground, pogo stubs, GND fan-out.
 #   In1  GND solid (minus the antenna keep-out)
 #   In2  VDD pour (minus the antenna keep-out), also carries signals
 #   F.Cu RF chain pre-routed: RF1 -> MLPF-WB55 -> 0.36 mm line (50 ohm over In1) -> tuning R34 / C36 -> antenna
@@ -138,7 +138,7 @@ track('RF_IN', rf1, mi, pcbnew.F_Cu, 0.25)
 r1, r2, c1, c2 = padxy('R34', '1'), padxy('R34', '2'), padxy('C36', '1'), padxy('C36', '2')
 ON, FN = pad('U8', 'A1').GetNetname(), pad('R34', '2').GetNetname()
 # 50 ohm line: north out of the filter, north of the (-10, 10) grommet flange, west to the tuning resistor
-yl = 13.9
+yl = 13.3                                   # layout update: 0.6 mm lower, under the J6 pin row (front edge)
 RF_PTS = [mo, (mo[0], 11.6), (mo[0] - (yl - 11.6), yl), (r1[0] + 1.2, yl), (r1[0], yl + 1.2 if yl + 1.2 < r1[1] else r1[1]), r1]
 RF_PTS = [p_ for i, p_ in enumerate(RF_PTS) if i == 0 or p_ != RF_PTS[i - 1]]
 path(ON, RF_PTS, pcbnew.F_Cu, 0.36)
@@ -185,6 +185,10 @@ for d_ in (-0.6, 0.6):
     vx = (epb[0] + d_ * math.sin(math.radians(eo)), epb[1] + d_ * math.cos(math.radians(eo)))
     via('GND', *vx, d=0.5, drill=0.3)
 
+# rev A (buck on the left edge): VIN pin 7 (north row) straight to the input cap C47, 0.3 mm (HV)
+p7, c47 = padxy('U12', '7'), padxy('C47', '1')        # C47 rot 180: its VBAT pad faces pin 7
+path('VBAT', [p7, (p7[0], p7[1] + 0.7), (c47[0], p7[1] + 0.7), c47], pcbnew.F_Cu, 0.3)
+
 # ------------------------------------------------------------------ LDO U5 (DFN-6, 0.4 mm): VSYS pins tied, GND escape, router stubs
 u5 = {p.GetNumber(): B(p.GetPosition()) for p in FPS['U5'].Pads()}
 out = unit(u5['5'], u5['2'])                       # away from the package, pins 1-3 side
@@ -205,6 +209,35 @@ wx = -1 if u11['2'][0] < u11['5'][0] else 1
 q11 = (u11['2'][0] + 0.45 * wx, u11['2'][1])
 track('GND', u11['2'], q11, L11, 0.15)
 stub_via('GND', q11, L11, rs=(0.5, 0.65, 0.8, 1.0), w=0.15)
+
+# ------------------------------------------------------------------ rev A (MCU centred): IMU fan-out on F.Cu, straight from the MCU
+# south row (pin 42 IMU_INT1, pin 44 SPI_MISO) to the IMU pins facing it (U1 rot 270)
+for nn_ in ('IMU_INT1', 'SPI_MISO'):
+    a_ = [B(p.GetPosition()) for p in FPS['U2'].Pads() if p.GetNetname() == nn_][0]
+    c_ = [B(p.GetPosition()) for p in FPS['U1'].Pads() if p.GetNetname() == nn_][0]
+    m_ = (a_[0], a_[1] - 0.8)
+    path(nn_, [a_, m_, (c_[0], c_[1] + 1.2), c_] if abs(a_[0] - c_[0]) > 0.01 else [a_, c_], pcbnew.F_Cu, 0.15)
+    print('IMU fan-out', nn_, a_, '->', c_)
+
+# escape vias for the IMU pins enclosed by the INT1 / MISO fan-out (SHUB_SCL, SHUB_SDA) and for MCU pin 43 (SPI_SCK)
+for nn_, ref_, dq in (('SHUB_SCL', 'U1', (-0.05, 0.9)), ('SHUB_SDA', 'U1', (0.05, 1.45)), ('SPI_SCK', 'U2', (0.0, -0.9))):
+    a_ = [B(p.GetPosition()) for p in FPS[ref_].Pads() if p.GetNetname() == nn_][0]
+    q_ = (a_[0] + dq[0], a_[1] + dq[1])
+    track(nn_, a_, q_, pcbnew.F_Cu, 0.15); via(nn_, *q_)
+    print('escape via', nn_, q_)
+
+# LED supply to the front LEDs D3 / D4, kept away from the magnetometer U3 (the LED current changes with the colour):
+# B.Cu from the supply diode D11 along the board interior, a via on the far side of each LED supply pin
+d11 = padxy('D11', '1')
+for led, cap, dv in (('D3', 'C42', (-0.95, -0.35)), ('D4', 'C45', (-0.35, -0.95))):
+    p4 = padxy(led, '4'); cp = [B(p.GetPosition()) for p in FPS[cap].Pads() if p.GetNetname() == 'VLED'][0]
+    vq = (p4[0] + dv[0], p4[1] + dv[1])
+    track('VLED', p4, vq, pcbnew.F_Cu, 0.25); via('VLED', *vq)
+    pts = [d11, (12.6, d11[1]), cp, (cp[0] + 1.2, cp[1]), vq] if led == 'D4' else [d11, (d11[0], d11[1] + 0.9), vq]
+    path('VLED', pts, pcbnew.B_Cu, 0.25)
+    if led == 'D3':
+        track('VLED', vq, cp, pcbnew.B_Cu, 0.25)
+    print('VLED to', led, 'pin 4', p4, 'via', vq, 'min distance to U3 %.1f mm' % min(LineString(pts).distance(Point(padxy('U3', '3'))), math.dist(p4, padxy('U3', '3'))))
 
 # ------------------------------------------------------------------ compass: C1 cap under the IIS2MDC corner (F.Cu stub - via - B.Cu stub)
 for (rt, nt, rb, nb_) in [('U3', '5', 'C18', '1')]:

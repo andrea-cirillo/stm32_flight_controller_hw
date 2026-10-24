@@ -1,5 +1,5 @@
 # Rip-up and A* repair loop for the connections Freerouting / A* left open (rev F).
-cd /home/claude/outH
+cd /home/claude/outFCB
 for it in 1 2 3 4 5 6; do
   python3 -c "
 import pcbnew
@@ -28,7 +28,7 @@ PY
     done
     others=$(echo $rip | tr ' ' '\n' | sort -u | grep -vx "$net" | tr '\n' ' ')
     echo "  $net: ripped [$others]"
-    python3 /home/claude/genH/astar.py ACwing_FC_A.kicad_pcb "$net" $others 2>/dev/null | grep "A\*" | sed 's/^/    /'
+    python3 /home/claude/genFCB/astar.py ACwing_FC_A.kicad_pcb "$net" $others 2>/dev/null | grep "A\*" | sed 's/^/    /'
   done < /tmp/claude-0/rp_items.txt
   python3 /home/claude/genE/cleanup.py ACwing_FC_A.kicad_pcb > /dev/null
 done

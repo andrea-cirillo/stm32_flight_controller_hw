@@ -1,4 +1,4 @@
-# ACwing GPS rev A: Freerouting round trip, GND stitching vias, zone fill, DRC report.
+# DimaQuadGPS rev A: Freerouting round trip, GND stitching vias, zone fill, DRC report.
 #   python3 route_gps.py <board> <work dir>
 import sys, os, re, subprocess, math
 import pcbnew

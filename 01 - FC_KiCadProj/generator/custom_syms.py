@@ -1,9 +1,9 @@
-# Project symbol library "ACwing": parts missing from the KiCad 7 libraries.
+# Project symbol library "DimaQuad": parts missing from the KiCad 7 libraries.
 import copy
 from sexp import dump, find, find1, Sym
 from kisch import flatten, rename_sym, set_prop, eff, S
 
-LIB = 'ACwing'
+LIB = 'DimaQuad'
 
 def _pin(typ, x, y, a, name, num, length=2.54, hide=False):
     p = [S('pin'), S(typ), S('line'), [S('at'), x, y, a], [S('length'), length]]
@@ -118,7 +118,7 @@ def mlpf_wb55():
     s = [S('symbol'), n, [S('in_bom'), S('yes')], [S('on_board'), S('yes')],
          [S('property'), 'Reference', 'U', [S('at'), -5.08, 3.81, 0], eff(justify='left')],
          [S('property'), 'Value', n, [S('at'), 0, -7.62, 0], eff()],
-         [S('property'), 'Footprint', 'ACwing:ST_MLPF-WB55-01E3_CSP-6', [S('at'), 0, 0, 0], eff(hide=True)],
+         [S('property'), 'Footprint', 'DimaQuad:ST_MLPF-WB55-01E3_CSP-6', [S('at'), 0, 0, 0], eff(hide=True)],
          [S('property'), 'Datasheet', 'https://www.st.com/resource/en/datasheet/mlpf-wb55-01e3.pdf', [S('at'), 0, 0, 0], eff(hide=True)],
          [S('property'), 'ki_keywords', 'RF low pass filter matching STM32WB', [S('at'), 0, 0, 0], eff(hide=True)],
          [S('property'), 'ki_description', '2.4 GHz low-pass filter with integrated matching for STM32WB55 (IN = RF1, OUT = 50 ohm antenna), 6-bump CSP', [S('at'), 0, 0, 0], eff(hide=True)],

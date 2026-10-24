@@ -1,6 +1,6 @@
 # Makes the project self-contained: every footprint used on the board is stored in the project library
 # ACwing.pretty exactly as placed (3D models in ${KIPRJMOD}/3d, project-specific edits such as the pogo-pad
-# clearance), and the board/schematic link to ACwing:<name>. KiCad's "footprint does not match library" check
+# clearance), and the board/schematic link to DimaQuad:<name>. KiCad's "footprint does not match library" check
 # then compares against these copies (the stock KiCad library copies differ by version and by 3D model path).
 import sys, os, re, json, collections, pcbnew
 OUT = sys.argv[1]

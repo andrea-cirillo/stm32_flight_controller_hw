@@ -5,7 +5,7 @@
   (paper "A3")
   (title_block
     (title "ACwing FC rev A - 1S-6S flight controller (STM32WB55CGU6), 4-in-1 ESC links, up to 8 motors")
-    (date "2026-10-19")
+    (date "2026-10-24")
     (rev "A")
     (company "ACwing - Andrea Cirillo")
     (comment 1 "Outline: frame C (40 x 40, as draft E); holes 20 x 20 (mechanical handoff, update 2026-10-18)")

@@ -1,11 +1,11 @@
 set -e
-cd /home/claude/outGPSD
-python3 /home/claude/genGPSD/route_gps.py ACwing_GPS_A.kicad_pcb /home/claude/outGPSD 2>&1 | grep -v "^$" | tail -3
+cd /home/claude/outGPS_RB
+python3 /home/claude/genGPS_RB/route_gps.py ACwing_GPS_A.kicad_pcb /home/claude/outGPS_RB 2>&1 | grep -v "^$" | tail -3
 python3 /home/claude/genD/cleanup.py ACwing_GPS_A.kicad_pcb | tail -1
 python3 /home/claude/genFlow/gnd_bridge.py ACwing_GPS_A.kicad_pcb | tail -2
 python3 -c "
 import pcbnew
-b=pcbnew.LoadBoard('/home/claude/outGPSD/ACwing_GPS_A.kicad_pcb')
+b=pcbnew.LoadBoard('/home/claude/outGPS_RB/ACwing_GPS_A.kicad_pcb')
 pcbnew.WriteDRCReport(b,'/tmp/claude-0/gdrc.rpt',pcbnew.EDA_UNITS_MILLIMETRES,True)"
 grep -E "^\[|Found" /tmp/claude-0/gdrc.rpt | sed 's/(.*//' | sort | uniq -c
 python3 - <<'PY'

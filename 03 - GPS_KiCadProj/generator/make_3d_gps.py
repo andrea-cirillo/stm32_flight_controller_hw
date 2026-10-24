@@ -1,4 +1,4 @@
-# ACwing GPS rev A: STEP models missing from the KiCad 7 library (same frame convention as genD/make_3d.py).
+# DimaQuadGPS rev A: STEP models missing from the KiCad 7 library (same frame convention as genD/make_3d.py).
 import sys
 sys.argv = sys.argv[:2]
 exec(open('/home/claude/genD/make_3d.py').read().split('# ---- PowerPAK')[0])

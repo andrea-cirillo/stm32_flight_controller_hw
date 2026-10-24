@@ -7,6 +7,7 @@ from shapely.geometry import box, Point
 OX, OY = 150.0, 100.0
 LOGO_LIB = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'ACwing_Logo.pretty')
 BOARD, CFG = sys.argv[1], sys.argv[2]
+REV = sys.argv[3] if len(sys.argv) > 3 else 'A'      # board revision letter printed on the silkscreen
 PRJ = os.path.dirname(os.path.abspath(BOARD))
 LIBNICK = {'fc': 'ACwing', 'esc': 'ACwing', 'gps': 'ACwing_GPS', 'flow': 'ACwing_Flow'}[CFG]
 b = pcbnew.LoadBoard(BOARD)
@@ -122,26 +123,26 @@ def text_any(s, bottom, c, h=0.8, maxr=6.0, alts=()):
     print('  NO SPOT for text', repr(s)); return None
 
 if CFG == 'fc':
-    logo_block('Full', False, (5.0, 3.0), 8, ['FC rev A'])
-    (logo_block('Full', True, (14.0, -3.0), 8, ['ACwing FC rev A'])
-     or logo_block('Mark', True, (14.0, -3.0), 6, ['ACwing FC rev A']))
+    logo_block('Full', False, (5.0, 3.0), 8, ['FC rev %s' % REV])
+    (logo_block('Full', True, (14.0, -3.0), 8, ['ACwing FC rev %s' % REV])
+     or logo_block('Mark', True, (14.0, -3.0), 6, ['ACwing FC rev %s' % REV]))
     for ref, s_ in (('J2', 'ESC A'), ('J6', 'ESC B'), ('J3', 'GPS'), ('J4', 'FLOW'), ('J5', 'ELRS'), ('J1', 'USB')):
         label(ref, s_)
     text_any('BAT', False, (-16.3, 9.2), 0.8, 3)
 elif CFG == 'esc':
     for d in list(b.GetDrawings()):
         pass
-    text_any('ACwing ESC 1S rev A', False, (0.0, 0.5), 0.8, 6.0, ('ESC 1S rev A',))
+    text_any('ACwing ESC 1S rev %s' % REV, False, (0.0, 0.5), 0.8, 6.0, ('ESC 1S rev %s' % REV,))
     logo_block('Full', False, (10.0, 15.0), 7, [])
-    logo_block('Full', True, (0.0, 1.5), 10, ['ACwing ESC 1S rev A'])
+    logo_block('Full', True, (0.0, 1.5), 10, ['ACwing ESC 1S rev %s' % REV])
     for ref, s_ in (('J1', 'TO FC'), ('J4', 'CHARGE')):
         label(ref, s_)
 
 elif CFG == 'gps':
-    text_any('ACwing GPS rev A', False, (2.6, 13.4), 0.8, 8.0, ('GPS rev A',))
+    text_any('ACwing GPS rev %s' % REV, False, (2.6, 13.4), 0.8, 8.0, ('GPS rev %s' % REV,))
     logo_block('Full', False, (-11.3, 0.0), 6, [])
-    (logo_block('Full', True, (-3.8, 8.0), 8, ['ACwing GPS rev A'])
-     or logo_block('Full', True, (-3.8, 8.0), 8, ['GPS rev A']) or logo_block('Mark', True, (-3.8, 8.0), 6, []))
+    (logo_block('Full', True, (-3.8, 8.0), 8, ['ACwing GPS rev %s' % REV])
+     or logo_block('Full', True, (-3.8, 8.0), 8, ['GPS rev %s' % REV]) or logo_block('Mark', True, (-3.8, 8.0), 6, []))
     for ref, s_ in (('J1', 'QWIIC IN'), ('J2', 'QWIIC OUT')):
         label(ref, s_)
 elif CFG == 'flow':

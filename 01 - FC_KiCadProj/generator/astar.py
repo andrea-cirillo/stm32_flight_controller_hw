@@ -13,7 +13,8 @@ OX, OY = 150.0, 100.0
 RES = 0.05
 X0, Y0, X1, Y1 = -26.0, -26.0, 26.0, 26.0        # routed window (board coords, mm)
 NX, NY = int((X1 - X0) / RES), int((Y1 - Y0) / RES)
-W, CLR = 0.15, 0.16
+import os
+W, CLR = 0.15, float(os.environ.get("ASTAR_CLR", "0.16"))
 VIA_D = 0.45
 b = pcbnew.LoadBoard(BOARD)
 def mm(v): return (pcbnew.ToMM(v.x) - OX, OY - pcbnew.ToMM(v.y))

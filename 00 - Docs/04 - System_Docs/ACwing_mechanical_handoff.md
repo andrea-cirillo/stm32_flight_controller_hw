@@ -4,7 +4,7 @@
 
 **From:** electronics design (ACwing FC, ACwing ESC 1S, ACwing Flow, ACwing GPS)
 **To:** mechanical / frame design agent
-**Date:** 2026-10-17, **updated 2026-10-18** (§0 supersedes the older items it names; §0.9 = FC rev A, §0.10 = power board rev A + stack check; §0.11 = GPS rev A, 6 mm standoffs)
+**Date:** 2026-10-17, **updated 2026-10-18** (§0 supersedes the older items it names; §0.9 = FC rev A, §0.10 = power board rev A + stack check; §0.11 = GPS rev A, 6 mm standoffs; §0.12 = layout update 2026-10-24)
 **Status:** §0 is a decided architecture change; **§0.7 gives the draft F boards as designed** (ACwing ESC 1S draft A, ACwing FC
 draft F, ACwing GPS draft C: connector coordinates, USB corner, LEDs, heights). §2 (flow board) is final.
 
@@ -175,6 +175,18 @@ to the frame:
 | Cables | FC J3 → GPS J1: loop outside the right edge from the FC top up to the GPS top. Keep 8 mm free beyond the right edge from the FC top to 4 mm above the GPS top |
 
 ---
+
+### 0.12 Layout update (2026-10-24, boards still rev A)
+| Item | Value |
+|---|---|
+| **FC J6 ESC link B** | moved from the left edge to the **front edge**, next to J5: centre (−8.2, +16.85), mouth +v; pins v = +14.85, u = −4.7 (pin 1) … −11.7 (pin 8); body u −14.1 … −2.3. Used only with a second 4-in-1 ESC (hexa / octo) |
+| FC J5 ELRS | unchanged, (+2.0, +16.85), mouth +v: J5 and J6 side by side on the front edge |
+| **FC input buck** | L3 (5 × 5 × **4.0 mm**, tallest FC part after the USB-C) now on the **left edge** at (−16.9, −4.6); U12 (−12.1, −5.0). The rear-left corner keeps only D1 / D2 and small capacitors (≤ 1.45 mm) |
+| FC MCU / IMU | MCU at (0, 0); IMU at (0, −7.6) (top). Frame: nothing changes (both are low parts) |
+| FC LEDs D3 / D4 | same positions, rotated 180° (light output unchanged) |
+| **GPS J1** | moved to (+11.88, **+3.6**), right above FC J3: cable B goes straight up at the right edge |
+| ESC 1S, Flow | unchanged |
+| Stack check (ESC 1S A + FC A + GPS A, 6 mm) | 0 clashes, closest items 0.39 mm (grommet hardware, unchanged) |
 
 ## 1. Coordinate conventions
 

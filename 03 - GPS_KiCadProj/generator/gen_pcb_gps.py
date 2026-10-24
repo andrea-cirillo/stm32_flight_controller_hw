@@ -1,4 +1,4 @@
-# ACwing GPS rev C: board from the netlist. 30 x 30 mm, r 2 corners, centred on (150, 100) like the FC (same
+# DimaQuadGPS rev C: board from the netlist. 30 x 30 mm, r 2 corners, centred on (150, 100) like the FC (same
 # 20 x 20 hole pattern as FC rev F), 2 layers, 1.0 mm. Rev D fixed: SAM-M10Q (top, 0 deg), J1 (Qwiic in, TOP, right edge),
 # J2 (Qwiic out, TOP, rear edge), holes: nothing taller than ~1 mm on the bottom (stack check with FC rev H, 6 mm standoffs).
 # The other parts start from a target spot and move to the nearest legal one (courtyards, hole keep-outs, outline).
@@ -95,7 +95,8 @@ for rot in (90, 270):
     if mp[0][0] > sig[0][0] + 1:
         break
 u_j = HALF - 0.35 - 0.9 - mp[0][0]
-put('J1', u_j, 0, rot, bottom=False)
+V_J1 = 3.6                                         # rev B: aligned with FC J3 (right edge, v = +3.6)
+put('J1', u_j, V_J1, rot, bottom=False)
 # rev D: J2 on the TOP, mouth toward -v at the rear edge (cable down to the flow board under the battery tray)
 for rot2 in (0, 180):
     put('J2', 0, 0, rot2, bottom=False)
@@ -283,7 +284,7 @@ pcbnew.SaveBoard(OUT + '/%s.kicad_pcb' % PROJECT, board)
 
 # ---------------------------------------------------------------- project rules (written after SaveBoard, which
 # would otherwise store the defaults of the fresh board). Based on the FC project file.
-pro = json.load(open('/home/claude/outD/ACwing_FC_D.kicad_pro'))
+pro = json.load(open('/home/claude/outD/DimaQuadFC_D.kicad_pro'))
 ns = pro['net_settings']
 base = [c for c in ns['classes'] if c['name'] == 'Default'][0]
 d = dict(base); d.update(clearance=0.15, track_width=0.2, via_diameter=0.5, via_drill=0.3)

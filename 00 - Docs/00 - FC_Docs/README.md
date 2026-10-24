@@ -17,6 +17,40 @@ stage that uses the common 4-in-1 ESC connector**:
 The FC has one USB-C port for data, DFU flashing and bench supply only. Battery charging lives on the 1S power board
 (its own USB-C), because only the 1S battery can be charged that way.
 
+## Layout update (2026-10-24, still rev A: no board made yet)
+| Item | Before | Now | Why |
+|---|---|---|---|
+| **MCU U2** | (−3.0, +3.0) | **(0, 0), board centre** | symmetric layout; RF line to the antenna 22.4 mm (≈ 0.2 dB more loss than before), 50 Ω microstrip over solid In1 GND |
+| **IMU U1** | (0, −3.6), rot 0 | **(0, −7.6), rot 270** | room for the pin escape south of the centred MCU; INT1 / MISO face MCU pins 42 / 44 (straight pre-routed lines). **Firmware: remap the IMU axes** (sensor X = board −v, Y = board +u) |
+| **J6 ESC link B** | left edge | **front edge, next to J5 (ELRS)**, same mouth direction, centre (−8.2, +16.85) | both cable ports together on the front edge; J6 body ≥ 3.4 mm from the antenna keep-out |
+| **Input buck U12 / L3** | rear-left corner, between the rear LEDs D1 / D2 | **left edge** (old J6 spot): L3 (−16.9, −4.6), U12 (−12.1, −5.0) | L3 no longer between the two LEDs; 41 mm from the magnetometer, 17 mm from the IMU |
+| LDO U5, C8, R3, R4 | south of the IMU | west of the IMU, (−4.6, −7.8) | IMU escape channel |
+| **LEDs D3 / D4** | supply pins toward the magnetometer | **rotated 180°**, supply (VLED) pre-routed on B.Cu from D11 along the board interior | the LED current changes with the colour: kept ≥ 4.8 mm from the magnetometer (was 3.9 mm, and a LED data line crossed it) |
+
+Stack: the GPS board Qwiic J1 moved to v = +3.6 so it sits right above FC J3 (straight cable). The ESC link (FC J2 /
+ESC J1) stays 8 mm offset: FC J2 can move only 0.8 mm before the USB-C, and ESC J1 cannot reach the rear-edge centre
+(motor M1 pads, fixed by the frame).
+
+## EMI check (magnetometer U3, IMU U1)
+`generator/emi_check.py`: Biot–Savart on every routed track of the current-carrying nets (contributions added in
+magnitude, no cancellation by the return path: an upper bound), dipole estimate for the inductors, distances on every
+layer, In1 GND under the sensors.
+
+| Source at the magnetometer | Before | Now |
+|---|---|---|
+| LED supply VLED (144 mA at full white, **varies with the colour**) | 6.3 µT, LED data line under the sensor | **4.7 µT**, nothing crosses the sensor |
+| VSYS / VBAT / VBUS / VEXP / VDD / VREG (DC, calibrated as hard iron) | 18.0 µT | 14.9 µT |
+| Buck switch node / L3 stray field | 0.23 / 0.02 µT | 0.39 / 0.03 µT |
+| Closest aggressor copper | LED data line 0 mm | LED data line 3.4 mm, VLED 4.1 mm |
+
+- Magnetometer: In1 GND 84 % under the sensor (+1 mm), no slots. The only colour-dependent term is the LED supply:
+  firmware either compensates it (LED current is known from the commanded colour) or keeps the LED pattern fixed while
+  the compass is used. The motor currents on the ESC 1S below (≈ 2 µT per motor at full throttle, 18 mm away) are
+  throttle-dependent: calibrate them with a throttle/compass fit. Outdoors, use the GPS board compass for the heading.
+- IMU: nearest switching node ≥ 7 mm (STM32 SMPS L1), buck ≥ 12 mm; In1 GND 83 % under the IMU, no slots. Only the
+  USB 5 V (DC, bench) and the ELRS UART (≥ 1.7 mm) pass nearby: no concern for a digital MEMS sensor. Vibration remains
+  the dominant disturbance (tap test on the first build).
+
 ## Changes from draft G
 | Item | Draft G | Rev A | Why |
 |---|---|---|---|
@@ -25,7 +59,7 @@ The FC has one USB-C port for data, DFU flashing and bench supply only. Battery 
 | **USB charger, 1S charge gate** | U6 STC4054, D10, R5–R7, C10, C11; Q6/Q7, R43, R45 | **removed** | charging moves to the 1S power board |
 | **External current input** | TP9/TP10 → PA6 | removed | PA6 is now motor M8 |
 | **Motor outputs** | 4 (TIM2) | **8**: M1–M4 TIM2 (J2), M5–M7 TIM1 CH1–CH3 (PA8–PA10), M8 TIM16 CH1 (PA6) on **ESC link B (J6)** | hexa / octo frames with two 4-in-1 ESCs |
-| **ESC link B (new)** | – | J6 JST SH 8-pin, top side, **left edge**, mouth toward the left; R25–R28 100 Ω; pins 2–4 (VBAT, CUR, TLM) open | same connector and cable as ESC link A; two ESC supplies are never tied together on the FC |
+| **ESC link B (new)** | – | J6 JST SH 8-pin, top side, **front edge next to J5** (layout update), mouth toward the front; R25–R28 100 Ω; pins 2–4 (VBAT, CUR, TLM) open | same connector and cable as ESC link A; two ESC supplies are never tied together on the FC |
 | **Battery pads (new)** | – | J7 VBAT+ / J8 GND, 2 × 2 mm, top side, left edge | FC supply when the ESC has no VBAT pin (separate ESCs, PDB) |
 | **Second Qwiic port (new)** | J3 only | J3 (right edge, front) + **J4 (right edge, rear)** in parallel | GPS board and flow board get their own cables; no daisy chain under the stack |
 | ELRS (J5) | USART1 PA9/PA10 | USART1 **PB6/PB7** (alternate pins) | PA9/PA10 are TIM1 for M6/M7 |
@@ -69,7 +103,7 @@ J7 / J8 pads ───┴─ VBAT 1S–6S ── U12 LM5166 (PFM) ── VREG 4.
   body-diode drop).
 
 ## ESC link A (J2) and ESC link B (J6)
-| Pin | J2 (ESC A, rear edge) | J6 (ESC B, left edge) |
+| Pin | J2 (ESC A, rear edge) | J6 (ESC B, front edge) |
 |---|---|---|
 | 1 | GND | GND |
 | 2 | VBAT 1S–6S → U12, VBAT_SNS, C2 | open |
@@ -105,28 +139,36 @@ See `ACwing_FC_A_pinmap.md`. Summary:
 ## Placement (board frame u right, v front; FC top view)
 | Part | Where |
 |---|---|
-| U12 LM5166, L3 (5 × 5 × 4 mm), C47, C49, C46, R47/R48 | top, rear-left corner: U12 (−8.7, −15.2), L3 (−15.3, −15.4), C47 (−7.0, −18.5). 21 mm from the board centre: the inductor field stays away from both compasses, and nothing 4 mm tall sits under the GPS board connectors |
-| C6 (VREG bulk) | top, (−11.3, −5.8), between J6 and the (−10, −10) grommet |
+| U2 MCU | top, **(0, 0)**, rot 180; MLPF U8 (−1.0, +6.1), crystal Y1 (−5.6, +2.4) |
+| U1 IMU | top, (0, −7.6), rot 270; LDO U5 (−4.6, −7.8) west of it |
+| U12 LM5166, L3 (5 × 5 × 4 mm), C47, C49, R47/R48 | top, **left edge**: L3 (−16.9, −4.6), U12 (−12.1, −5.0), C47 (−11.8, −1.9) rot 180 (VBAT pad toward U12 pin 7), C49 (−9.0, −2.8) |
+| C6, C46 (VREG bulk) | top, (−15.9, −9.7), (−13.7, −13.0) |
 | C2 (VBAT at J2) | top, (−1.6, −12.4) |
 | Q5, D9, C7, R2 (power path) | top, east of the IMU, (+6.6, −4.4) / (+5.2, −7.3) |
-| J2 ESC A | top, rear edge, (+1.5, −16.9), mouth −v (unchanged) |
-| **J6 ESC B** | top, **left edge**, (−16.9, −3.4), mouth −u; pins u = −14.9, v = +0.1 (pin 1) … −6.9 (pin 8) |
+| J2 ESC A | top, rear edge, (+1.5, −16.9), mouth −v |
+| **J6 ESC B** | top, **front edge**, (−8.2, +16.85), mouth +v; pins v = +14.85, u = −4.7 (pin 1) … −11.7 (pin 8) |
+| J5 ELRS | top, front edge, (+2.0, +16.85), mouth +v |
 | **J7 VBAT+ / J8 GND** | top, left edge, (−18.4, +7.2) / (−18.4, +4.1); "+" / "−" on the silkscreen |
-| J3 Qwiic (GPS) | top, right edge, (+16.9, **+3.6**), mouth +u (0.8 mm forward of draft G, to make room for J4) |
-| **J4 Qwiic (flow)** | top, right edge, (+16.9, −4.3), mouth +u |
-| J5 ELRS, J1 USB-C, LEDs, sensors, antenna, pogo grid | unchanged |
+| J3 Qwiic (GPS) | top, right edge, (+16.9, +3.6), mouth +u; GPS J1 right above it |
+| J4 Qwiic (flow) | top, right edge, (+16.9, −4.3), mouth +u |
+| LEDs D1–D4 | top: D1 (−11.0, −18.4), D2 (−18.4, −11.0), D3 (+11.0, +18.4) rot 180, D4 (+18.4, +11.0) rot 270 |
+| U3 magnetometer, U4 baro | top, front-right corner, (+17.4, +17.4) / (+16.6, +14.2) |
+| J1 USB-C, antenna AE1, pogo grid, flash U10 (bottom) | J1 (+15.8, −15.8) at the chamfer, AE1 left edge front, pogo grid bottom rear centre, U10 bottom (+8.9, −3.6) |
 
 ## PCB
-- 4 layers, 1.0 mm, stack-up and rules as drafts F/G. New net class **HV** (VBAT, BUCK_SW): 0.3 mm tracks, 0.15 mm
+- 4 layers, 1.0 mm, stack-up and rules as drafts F/G. Net class **HV** (VBAT, BUCK_SW): 0.3 mm tracks, 0.15 mm
   clearance (6S). VREG in the Power class (0.3 mm).
-- U12: GND pins (3 ILIM, 5 RT, 10) tied straight into the exposed pad, two 0.3 mm vias in the pad to the In1 GND plane.
-- Routing: 1062 tracks, 187 vias: Freerouting in one run plus the locked pre-routes (RF chain, crystal, MCU ground,
-  DFN / VSON details, pogo stubs, GND fan-out).
+- U12: GND pins (3 ILIM, 5 RT, 10) tied straight into the exposed pad, two 0.3 mm vias in the pad to the In1 GND plane;
+  VIN pin 7 pre-routed (0.3 mm) to C47.
+- Routing: 1342 tracks, 212 vias. Locked pre-routes: RF chain, crystal, MCU ground, DFN / VSON details, pogo stubs, GND
+  fan-out, IMU fan-out (INT1, MISO) and escape vias (SHUB_SCL / SDA, SPI_SCK), LED supply to D3 / D4; the rest
+  Freerouting plus A* for the last connections. Some VSYS / VBUS runs on In2 are 0.2 mm (≤ 0.3 A, inner layer).
 
 ## Checks
 - Netlist: 0 errors (`check_net.py`, 91 nets).
 - KiCad DRC (`ACwing_FC_A_DRC.rpt`): **0 violations, 0 unconnected pads, 0 footprint errors**.
-- Silkscreen: 103 references on the board (C17 and two more on the Fab layer only: no free spot), 8 with a leader line.
+- EMI check (`emi_check.py`): see above.
+- Silkscreen: 102 references on the board (R21, R42 on the Fab layer only: no free spot), 9 with a leader line.
 
 ## Fabrication (JLCPCB)
 - 4 layers, 1.0 mm FR-4; parts on both sides (top 36, bottom 57).

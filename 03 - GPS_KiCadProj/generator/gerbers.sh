@@ -1,5 +1,5 @@
 set -e
-cd /home/claude/outGPSD
+cd /home/claude/outGPS_RB
 rm -rf gerber && mkdir gerber
 kicad-cli pcb export gerbers -l F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts --subtract-soldermask --use-drill-file-origin -o gerber/ ACwing_GPS_A.kicad_pcb >/dev/null
 kicad-cli pcb export drill --drill-origin plot --excellon-separate-th -u mm -o gerber/ ACwing_GPS_A.kicad_pcb >/dev/null

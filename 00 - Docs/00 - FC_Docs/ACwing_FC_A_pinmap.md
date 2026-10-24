@@ -73,7 +73,7 @@ All alternate functions below were checked against ST's pin data (STM32_open_pin
 | 4 | TLM | 100 Ω → PB0 (optional) |
 | 5–8 | M1–M4 | 100 Ω → PA0–PA3 (TIM2 CH1–CH4) |
 
-## ESC link B (J6, JST SH 8-pin, top side, left edge at v ≈ −3.8, mouth toward the left)
+## ESC link B (J6, JST SH 8-pin, top side, front edge next to J5, pins at v = +14.85, mouth toward the front)
 | Pin | Signal | FC side |
 |---|---|---|
 | 1 | GND | GND |
@@ -85,7 +85,7 @@ All alternate functions below were checked against ST's pin data (STM32_open_pin
 The same 1:1 JST SH 8-pin cable fits both links. Check the pin order of any third-party ESC before plugging it in.
 
 ## Battery / power input pads (J7 VBAT+, J8 GND)
-2 × 2 mm pads, top side, left edge (above J6). Same VBAT net as J2 pin 2: an alternative FC supply when the ESC has
+2 × 2 mm pads, top side, left edge. Same VBAT net as J2 pin 2: an alternative FC supply when the ESC has
 no VBAT pin (separate ESCs with a PDB). FC current only (≤ 0.5 A at 4.1 V), no motor current. Use one supply source at
 a time.
 

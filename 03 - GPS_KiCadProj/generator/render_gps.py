@@ -33,10 +33,10 @@ def centred(d, dz=0.0):
 # --- GPS board alone
 Tg, Cg = centred(G)
 fig, axs = plt.subplots(1, 3, figsize=(21, 7.5))
-view(axs[0], Tg, Cg, 0, 0, 'Top: SAM-M10Q at 45 deg, PPS LED, FRONT arrow')
+view(axs[0], Tg, Cg, 0, 0, 'Top: SAM-M10Q (axis-aligned), Qwiic J1 aligned with FC J3, PPS LED')
 view(axs[1], Tg, Cg, -35, -60, 'Isometric')
 view(axs[2], Tg, Cg, 0, 180, 'Bottom: compass, backup, test pads (nothing above 1.1 mm)')
-plt.tight_layout(); plt.savefig('/home/claude/outGPSD/ACwing_GPS_A_3D.png', dpi=80); plt.close()
+plt.tight_layout(); plt.savefig('/home/claude/outGPS_RB/ACwing_GPS_A_3D.png', dpi=80); plt.close()
 
 # --- stack: FC + standoffs + GPS board + cable sketch
 Ts_, Cs_ = centred(S)
@@ -56,7 +56,7 @@ for hx, hy in ((10, 10), (-10, 10), (-10, -10), (10, -10)):        # grommets (b
     t, c = cyl(hx, hy, Z_FC + T_FC, Z_FC + T_FC + STANDOFF, 1.75, (0.93, 0.93, 0.9)); extra_T += t; extra_C += c
 # cable sketch (KiCad x, y, z): FC J3 mouth (top, right edge) -> loop outside the right edge -> GPS J1 mouth (rev D: GPS top)
 zf, zg = Z_FC + T_FC + 1.4, Z_FC + T_FC + STANDOFF + 1.0 + 1.4
-path = [(170.2, 96.4, zf), (172.6, 96.8, zf + 0.6), (174.2, 97.8, zf + 2.4), (174.0, 99.0, zf + 5.0), (172.0, 100.0, zg + 0.6), (168.0, 100.0, zg + 0.3), (165.2, 100.0, zg)]
+path = [(170.2, 96.4, zf), (172.6, 96.4, zf + 0.6), (174.2, 96.4, zf + 2.4), (174.0, 96.4, zf + 5.0), (172.0, 96.4, zg + 0.6), (168.0, 96.4, zg + 0.3), (165.2, 96.4, zg)]   # GPS J1 right above FC J3 (v = +3.6)
 path = np.array([(x - 150, 100 - y, z) for x, y, z in path])
 dense = []
 for a, b_ in zip(path, path[1:]):
@@ -72,7 +72,7 @@ for i in range(len(dense) - 1):
     extra_T += [[q[0], q[1], q[2]], [q[0], q[2], q[3]]]; extra_C += [(0.12, 0.12, 0.12)] * 2
 Ts = np.concatenate([Ts_, Tf, Tg2, np.array(extra_T)]); Cs = np.concatenate([Cs_, Cf, Cg2, np.array(extra_C)])
 fig, axs = plt.subplots(1, 2, figsize=(20, 9))
-view(axs[0], Ts, Cs, -35, -62, 'Stack: ACwing ESC1S B + FC H (grommets, 5 mm gap) + GPS D (6 mm standoffs)')
-view(axs[1], Ts, Cs, 0, -90, 'Side view (-Y): Qwiic loop at the right edge')
-plt.tight_layout(); plt.savefig('/home/claude/outGPSD/ACwing_stack_3D.png', dpi=80); plt.close()
+view(axs[0], Ts, Cs, -35, -62, 'Stack: ACwing ESC 1S + FC (grommets, 5 mm gap) + GPS (6 mm gap), rev A')
+view(axs[1], Ts, Cs, 0, -90, 'Side view (-Y): Qwiic cable FC J3 -> GPS J1, straight up at the right edge')
+plt.tight_layout(); plt.savefig('/home/claude/outGPS_RB/ACwing_stack_3D.png', dpi=80); plt.close()
 print('renders written')

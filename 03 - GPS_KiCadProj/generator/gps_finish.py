@@ -38,7 +38,7 @@ ax, ay = -4.6, 12.4
 line((ax - 0.85, ay - 0.85), (ax + 0.85, ay + 0.85))
 line((ax + 0.85, ay + 0.85), (ax + 0.85, ay + 0.1)); line((ax + 0.85, ay + 0.85), (ax + 0.1, ay + 0.85))
 text('FRONT', ax - 1.2, ay + 0.3, just='right')
-text('ACwing GPS D', 2.6, 13.4, just='left')
+text('ACwing GPS rev A', 2.6, 13.4, just='left')
 pcbnew.SaveBoard(BOARD, b)
 
 # ---------------------------------------------------------------- 2. project library + 3D models

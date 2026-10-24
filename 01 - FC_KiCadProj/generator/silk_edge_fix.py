@@ -1,4 +1,4 @@
-# ACwing ESC 1S rev A: silkscreen clean-up after silk_refs (USB-C outline lines at the chamfer edge, overlapped references)
+# DimaQuadESC rev B: silkscreen clean-up after silk_refs (USB-C outline lines at the chamfer edge, overlapped references)
 # and project-library refresh (footprints stored as placed, so the library check matches).
 import sys, re, pcbnew, subprocess
 B_ = sys.argv[1]

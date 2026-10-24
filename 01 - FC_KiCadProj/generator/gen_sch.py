@@ -1,21 +1,21 @@
-# Generates ACwing FC.kicad_sch (KiCad 7 format) for the ACwing flight controller.
+# Generates DimaQuadFC.kicad_sch (KiCad 7 format) for the DimaMiniQuad flight controller.
 import sys, json
 import kisch
 from kisch import Schematic, POWER_LIB, vec, g
 from custom_syms import all_symbols, LIB
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else 'ACwing FC.kicad_sch'
-PROJECT = 'ACwing_FC_E'
+OUT = sys.argv[1] if len(sys.argv) > 1 else 'DimaQuadFC.kicad_sch'
+PROJECT = 'DimaQuadFC_E'
 
 POWER_LIB.update({'GND': 'power:GND', 'VDD': 'power:VDD', 'VBUS': 'power:VBUS',
                   'VBAT': LIB + ':VBAT', 'VBAT_F': LIB + ':VBAT_F', 'VSYS': LIB + ':VSYS'})
 
 sch = Schematic(PROJECT, 'A3', title=dict(
-    title='ACwing FC rev E - 1S flight controller (STM32WB55CGU6)',
+    title='DimaQuadFC rev E - 1S flight controller (STM32WB55CGU6)',
     date='2026-10-18', rev='E',
-    company='ACwing - Andrea Cirillo',
-    comments=['Outline and keep-outs: ACwing_FC_C_Edge_Cuts.dxf, ACwing_FC_C_Keepouts.dxf (frame C)',
-              'Placement: ACwing_FC_C_Placement.csv (mechanical handoff)',
+    company='UAV Control - A. Cirillo',
+    comments=['Outline and keep-outs: DimaQuadFC_C_Edge_Cuts.dxf, DimaQuadFC_C_Keepouts.dxf (frame C)',
+              'Placement: DimaQuadFC_C_Placement.csv (mechanical handoff)',
               'Motor stage: BoM_motori.xlsx',
               'Generated automatically: run ERC before release']))
 
@@ -455,11 +455,11 @@ for k, (tp, net, nt) in enumerate([('TP1', 'CRSF_TX', 'USART1 TX (PA9), ELRS por
              field_pos={'Reference': (x - 1.27, 227.33), 'Value': (x - 1.27, 224.79), 'just': 'left'})
 for k in range(4):
     sch.part('H%d' % (k + 1), 'Mechanical:MountingHole_Pad', 'D3.2', 378.46 + 7.62 * k, 228.6, 0, {'1': 'GND'},
-             fp='ACwing:Grommet_PTH_3.2mm_Pad5.0mm',
+             fp='DimaQuad:Grommet_PTH_3.2mm_Pad5.0mm',
              fields={'Note': 'Plated 3.2 hole for an M2 anti-vibration grommet, 16x16 pattern (frame C). Exposed 5.0 mm copper ring on both sides, GND'},
              field_pos={'Reference': (378.46 + 7.62 * k, 220.98), 'Value': (378.46 + 7.62 * k, 223.52)},
              in_bom=False)
-note('Grommet holes 3.2 PTH, 16x16\nfrom ACwing_FC_C_Keepouts.dxf', (375.92, 240.03))
+note('Grommet holes 3.2 PTH, 16x16\nfrom DimaQuadFC_C_Keepouts.dxf', (375.92, 240.03))
 
 # ================================================================ G. EXPANSION (Qwiic) AND ELRS PORTS (rev E)
 block('G - Expansion bus (Qwiic) and ELRS ports (rev E)', (186.69, 192), (282, 217.17))

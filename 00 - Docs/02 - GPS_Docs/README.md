@@ -6,6 +6,9 @@
 
 > **Revisions.** Rev A is the first released revision. Earlier letters, marked *draft* in this document (drafts A–C), are internal design iterations that were never manufactured.
 
+> **Layout update (2026-10-24, still rev A).** Qwiic J1 moved from v = 0 to v = +3.6, right above FC J3; re-routed,
+> DRC 0. Nothing else changed.
+
 KiCad 7 project (it also opens in KiCad 8/9). A 30 × 30 mm board that stacks on top of the flight controller on the
 same **20 × 20 mm** holes, on **6 mm** nylon standoffs. Circuit identical to drafts B/C (Qwiic expansion bus, GNSS on
 DDC, compass).
@@ -13,7 +16,7 @@ DDC, compass).
 ## Changes from draft C
 | Draft C | Rev A | Why |
 |---|---|---|
-| Qwiic J1 / J2 on the bottom side | **J1 / J2 on the top side**: J1 right edge (11.88, 0), mouth +u; J2 rear edge (0, −11.88), mouth −v | stack check with mated plugs: on the bottom, the J1 plug sat right above FC rev A J3/J4 and hit them (−0.6 mm at 6 mm standoffs) |
+| Qwiic J1 / J2 on the bottom side | **J1 / J2 on the top side**: J1 right edge (11.88, **+3.6**, right above FC J3), mouth +u; J2 rear edge (0, −11.88), mouth −v | stack check with mated plugs: on the bottom, the J1 plug sat right above FC rev A J3/J4 and hit them (−0.6 mm at 6 mm standoffs) |
 | SAM-M10Q rotated 45° | **SAM-M10Q axis-aligned (0°)**, centred | the 45° module leaves only 4 mm at the edge midpoints; at 0° there are 7.25 mm strips for the connectors |
 | 8 mm standoffs needed with FC rev A | **6 mm standoffs** (as designed): bottom side ≤ 1.1 mm (compass, backup, test pads) | stack check: 0 clashes, closest items 0.39 mm (mounting hardware, unchanged) |
 
@@ -22,7 +25,7 @@ Schematic: notes and title block only. Same LCSC parts, same firmware, same comp
 ### Notes on the change
 - The connectors (2.9 mm) sit 0.6 mm from the module side walls (6.3 mm). They are lower than the antenna top and
   outside the module footprint; GNSS performance should be checked outdoors (C/N0) against draft C.
-- Cable: FC J3 (FC top, right edge) → GPS J1 (GPS top, right edge), a short loop outside the right edge.
+- Cable: FC J3 (FC top, right edge) → GPS J1 (GPS top, right edge, aligned with FC J3), a short straight loop outside the right edge.
   GPS J2 is a pass-through only: the flow board now has its own FC port (J4).
 
 ## Changes from draft A (kept in draft B and C)
@@ -83,7 +86,8 @@ m_fc = R · m_gps,   R = [  0.7071  -0.7071   0 ]
 - 30 × 30 × 1.0 mm, R2 corners, centred on the FC. 4 × M2 (Ø2.2 NPTH) on the 20 × 20 pattern, keep-out r 2.6 mm.
 - Stack: FC on its grommets → 6 mm gap → GPS board (frame C2: printed S2 spacer on the M2 screw column, titanium or
   A4 stainless screws, see `04 - System_Docs`). Top of the module ≈ 13.3 mm above the FC top.
-- Cables: FC rev A J3 (top, right edge, v = +3.6) → GPS J1 (top, right edge, v = 0), short loop outside the right edge.
+- Cables: FC rev A J3 (top, right edge, v = +3.6) → GPS J1 (top, right edge, v = +3.6): the two connectors are
+  aligned, the cable goes straight up outside the right edge (layout update 2026-10-24; J1 was at v = 0).
   The flow board has its own FC port (rev A J4); GPS J2 is an optional pass-through.
 - Stack check (ACwing ESC 1S A + FC A + GPS A, 6 mm standoffs, all plugs mated): no clash; wherever a GPS bottom part sits above an
   FC rev A top part the vertical gap is ≥ 3.0 mm.

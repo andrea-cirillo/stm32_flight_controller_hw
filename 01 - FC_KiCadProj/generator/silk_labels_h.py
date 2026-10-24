@@ -3,7 +3,7 @@ import sys, pcbnew
 B = sys.argv[1]; b = pcbnew.LoadBoard(B)
 OX, OY = 150.0, 100.0
 for d in list(b.GetDrawings()):
-    if d.GetClass() == 'PCB_TEXT' and d.GetText() in ('+', '-', 'ESC B', 'ESC A', 'BAT', 'ACwing FC H'):
+    if d.GetClass() == 'PCB_TEXT' and d.GetText() in ('+', '-', 'ESC B', 'ESC A', 'BAT', 'DimaQuadFC H'):
         b.Remove(d)
 def txt(s, u, v, h=0.8, ang=0):
     t = pcbnew.PCB_TEXT(b); t.SetText(s); t.SetLayer(pcbnew.F_SilkS)

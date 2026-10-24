@@ -1,10 +1,10 @@
-# Generates ACwing FC.kicad_sch (KiCad 7 format) for the ACwing flight controller.
+# Generates DimaQuadFC.kicad_sch (KiCad 7 format) for the DimaMiniQuad flight controller.
 import sys, json
 import kisch
 from kisch import Schematic, POWER_LIB, vec, g
 from custom_syms import all_symbols, LIB
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else 'ACwing FC.kicad_sch'
+OUT = sys.argv[1] if len(sys.argv) > 1 else 'DimaQuadFC.kicad_sch'
 PROJECT = 'ACwing_FC_A'
 
 POWER_LIB.update({'GND': 'power:GND', 'VDD': 'power:VDD', 'VBUS': 'power:VBUS',
@@ -13,9 +13,9 @@ POWER_LIB.update({'GND': 'power:GND', 'VDD': 'power:VDD', 'VBUS': 'power:VBUS',
 sch = Schematic(PROJECT, 'A3', title=dict(
     title='ACwing FC rev A - 1S-6S flight controller (STM32WB55CGU6), 4-in-1 ESC links, up to 8 motors',
     date='2026-10-18', rev='H',
-    company='ACwing - Andrea Cirillo',
+    company='UAV Control - A. Cirillo',
     comments=['Outline: frame C (40 x 40, as rev E); holes 20 x 20 (mechanical handoff, update 2026-10-18)',
-              'Power and motors from a 4-in-1 ESC (JST SH 8-pin ESC A J2, ESC B J6) or the ACwing 1S power board',
+              'Power and motors from a 4-in-1 ESC (JST SH 8-pin ESC A J2, ESC B J6) or the DimaQuad 1S power board',
               'Pin map: ACwing_FC_A_pinmap.md',
               'Generated automatically: run ERC before release']))
 
@@ -204,7 +204,7 @@ mcu = {
     # rev F pin map (ACwing_FC_A_pinmap.md): the MCU sits at the board centre, no pin row faces an edge.
     # All four motor outputs on TIM2 CH1-CH4 (one DMA burst: PWM for brushed, DShot / bidirectional DShot for brushless)
     '9': 'PWM_M1', '10': 'PWM_M2', '11': 'PWM_M3', '12': 'PWM_M4',   # PA0-PA3 TIM2_CH1-CH4
-    '13': 'ESC_CUR',                                   # PA4 ADC1_IN9: current from the ESC link (0.1 V/A on ACwing ESC1S)
+    '13': 'ESC_CUR',                                   # PA4 ADC1_IN9: current from the ESC link (0.1 V/A on DimaQuadESC)
     '14': 'VBAT_SNS',                                  # PA5 ADC1_IN10: VBAT/2
     '29': 'VBUS_DET',                                  # PB1 GPIO: VBUS/2 reads high with USB plugged in
     '43': 'SPI_SCK', '44': 'SPI_MISO', '45': 'SPI_MOSI',   # PB3/PB4/PB5 SPI1: IMU + log flash
@@ -370,7 +370,7 @@ C('C1', '100nF', 106.68, 241.3, 'ESC_CUR', 'GND', fields={'Note': 'ADC input cap
 C('C2', '4.7uF 50V', 121.92, 241.3, 'VBAT', 'GND', fp=FP_C1206, fields={'Note': 'VBAT at the ESC link (up to 6S): local bulk for the cable inductance, X7R 50 V'})
 sch.pwr_flag('VBAT', (134.62, 236.22))
 note('ESC link A (rev H):\n'
-     '- ACwing 1S power board (brushed): CUR = 0.1 V/A.\n'
+     '- DimaQuad 1S power board (brushed): CUR = 0.1 V/A.\n'
      '- Brushless 4-in-1 ESC, 2S-6S: CUR scale set in firmware\n'
      '  (about 12 mV/A); telemetry via bidirectional DShot / EDT.\n'
      '- VBAT 1S-6S feeds the FC (buck U12, block A).\n'
@@ -450,7 +450,7 @@ for k, (tp, net, nt) in enumerate([('TP1', 'CRSF_TX', 'USART1 TX (PB6), ELRS por
              field_pos={'Reference': (x - 1.27, 227.33), 'Value': (x - 1.27, 224.79), 'just': 'left'})
 for k in range(4):
     sch.part('H%d' % (k + 1), 'Mechanical:MountingHole_Pad', 'D3.2', 378.46 + 7.62 * k, 228.6, 0, {'1': 'GND'},
-             fp='ACwing:Grommet_PTH_3.2mm_Pad5.0mm',
+             fp='DimaQuad:Grommet_PTH_3.2mm_Pad5.0mm',
              fields={'Note': 'Plated 3.2 hole for an M2 anti-vibration grommet, 20x20 pattern (rev F). Exposed 5.0 mm copper ring on both sides, GND'},
              field_pos={'Reference': (378.46 + 7.62 * k, 220.98), 'Value': (378.46 + 7.62 * k, 223.52)},
              in_bom=False)

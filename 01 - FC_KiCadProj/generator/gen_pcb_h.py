@@ -5,14 +5,14 @@
 #   MCU at the board centre on the top side (rot 180: motor and ADC pins face east, RF pin north-west toward the chip
 #   antenna kept at the left edge as rev E), IMU south of it near the centre, compass at the front corner, four
 #   WS2812B mirrored about the front-rear diagonal, ESC link J2 on the top at the rear edge (8 mm west of
-#   ACwing ESC1S J1). Fixed parts first, the others go to the nearest legal spot from a target.
+#   DimaQuadESC J1). Fixed parts first, the others go to the nearest legal spot from a target.
 #   python3 gen_pcb_h.py <out dir> <netlist xml>
 import sys, json, math, re, uuid, os
 import xml.etree.ElementTree as ET
 import pcbnew
 from shapely.geometry import Polygon, Point, box as sbox
 from shapely.ops import unary_union
-sys.path.insert(0, '/home/claude/genH')
+sys.path.insert(0, '/home/claude/genFCB')
 from kisch import uid
 
 OUT, NETXML = sys.argv[1], sys.argv[2]
@@ -46,7 +46,7 @@ seg((20, 17), (20, -11.5)); seg((20, -11.5), (20 + BUMP, -11.5 - BUMP))
 seg((20 + BUMP, -11.5 - BUMP), (20 + BUMP, 20 + BUMP - CH)); seg((20 + BUMP, 20 + BUMP - CH), (CH - 20 - BUMP, -20 - BUMP))
 seg((CH - 20 - BUMP, -20 - BUMP), (11.5 + BUMP, -20 - BUMP)); seg((11.5 + BUMP, -20 - BUMP), (11.5, -20))
 seg((11.5, -20), (-17, -20)); arc((-17, -20), (-20 + k3, -20 + k3), (-20, -17))
-# rev H: front-left corner chamfered (v - u = 36.6) like the ACwing ESC 1S rev A charge-port corner below it, so a USB-C
+# rev H: front-left corner chamfered (v - u = 36.6) like the DimaQuadESC rev B charge-port corner below it, so a USB-C
 # plug in the power board never runs under the FC (stack check 2026-10-18); the chip antenna stays inside the outline
 seg((-20, -17), (-20, 16.6)); seg((-20, 16.6), (-16.6, 20))
 
@@ -116,8 +116,8 @@ def pp(ref, num): return [B(p.GetPosition()) for p in FPD[ref].Pads() if p.GetNu
 # ---------------------------------------------------------------- fixed parts
 FIXED = {   # ref: (u, v, rot, bottom)
     'H1': (10, 10, 0, False), 'H2': (-10, 10, 0, False), 'H3': (-10, -10, 0, False), 'H4': (10, -10, 0, False),
-    'U2': (-3.0, 3.0, 180, False),                  # MCU, board centre
-    'U1': (0.0, -3.6, 0, False),                    # IMU: 3.6 mm from the centre, axes as rev E
+    'U2': (0.0, 0.0, 180, False),                   # layout update 2026-10-24: MCU exactly at the board centre
+    'U1': (0.0, -7.6, 270, False),                  # IMU: south of the MCU, rot 270: INT1 / MISO face MCU pins 42 / 44
     'U3': (17.4, 17.4, 45, False), 'U4': (16.64, 14.2, 0, False),   # compass (front corner) and baro, as rev E
     'AE1': (-18.6, 14.5, -90, False), 'R34': (-16.95, 15.53, 90, False), 'C36': (-16.95, 17.45, 90, False),
     'J1': (15.767, -15.767, 45, False),             # USB-C at the chamfer, 0.85 mm further out than rev E
@@ -125,14 +125,16 @@ FIXED = {   # ref: (u, v, rot, bottom)
     'J4': (16.9, -4.3, 90, False),                  # rev H: second Qwiic, right edge (rear-right): flow board
     'J7': (-18.4, 7.2, 0, False), 'J8': (-18.4, 4.1, 0, False),   # rev H: battery / power input pads, left edge
     'J5': (2.0, 16.85, 180, False),                 # ELRS, top edge (front-left)
-    # RGB LEDs, mirrored about the front-rear diagonal u = v (and point-symmetric front / rear)
-    'D1': (-11.0, -18.4, 180, False), 'D2': (-18.4, -11.0, 270, False), 'D3': (11.0, 18.4, 0, False), 'D4': (18.4, 11.0, 90, False),
+    'J6': (-8.2, 16.85, 180, False),                # layout update: ESC link B on the front edge, next to J5 (same mouth direction)
+    # RGB LEDs, mirrored about the front-rear diagonal u = v (and point-symmetric front / rear); rev A: D3 / D4 turned
+    # 180 deg so their supply pins (VLED) face away from the magnetometer corner
+    'D1': (-11.0, -18.4, 180, False), 'D2': (-18.4, -11.0, 270, False), 'D3': (11.0, 18.4, 180, False), 'D4': (18.4, 11.0, 270, False),
 }
 for ref, (u, v, r, bot) in FIXED.items():
     put(ref, u, v, r, bot)
 # ESC link J2: TOP side, rear edge, mouth (fixing tabs, footprint +Y) toward -v. Not on the bottom: there it would sit
-# right above ACwing ESC1S J1 (both 2.9 mm tall, more than the 5 mm stack gap). Left of the USB-C corner, 8 mm west
-# of ACwing ESC1S J1: the 1:1 cable (loose wires) makes an S from the ESC top up to the FC top
+# right above DimaQuadESC J1 (both 2.9 mm tall, more than the 5 mm stack gap). Left of the USB-C corner, 8 mm west
+# of DimaQuadESC J1: the 1:1 cable (loose wires) makes an S from the ESC top up to the FC top
 put('J2', 0, 0, 0)
 assert pp('J2', 'MP')[1] < pp('J2', '1')[1] - 1
 U_J2 = 1.5
@@ -143,11 +145,7 @@ POGO = {'TP4': (-3.81, -14.27), 'TP5': (-1.27, -14.27), 'TP1': (1.27, -14.27), '
         'TP6': (-3.81, -11.73), 'TP7': (-1.27, -11.73), 'TP8': (1.27, -11.73), 'TP3': (3.81, -11.73)}
 for ref, (u, v) in POGO.items():
     put(ref, u, v, 0, bottom=True)
-# rev H: ESC link B (motors M5-M8) on the TOP side at the LEFT edge, mouth toward -u, MP tabs 1.25 mm inside the edge
-put('J6', 0, 0, 270)
-assert pp('J6', 'MP')[0] < pp('J6', '1')[0] - 1
-put('J6', -20.0 + 0.35 + 0.9 - pp('J6', 'MP')[0], -3.4, 270)
-for ref in list(FIXED) + ['J2', 'J6'] + list(POGO):
+for ref in list(FIXED) + ['J2'] + list(POGO):
     FPD[ref].SetLocked(True)
 print('J2 pins: 1 at (%.2f, %.2f), 8 at (%.2f, %.2f)' % (pp('J2', '1') + pp('J2', '8')))
 print('J6 pins: 1 at (%.2f, %.2f), 8 at (%.2f, %.2f)' % (pp('J6', '1') + pp('J6', '8')))
@@ -161,22 +159,22 @@ pin = {n: pp('U2', n) for n in ('4', '7', '9', '13', '14', '20', '21', '23', '24
 # ---------------------------------------------------------------- movable parts: (ref, u, v, rot, bottom)
 T = [
     # RF chain: matched filter right at RF1, crystal at the HSE pins (north-west corner of the MCU)
-    ('Y1', -8.6, 5.4, 90, False),
+    ('Y1', -5.6, 2.4, 90, False),
     # MCU decoupling and support (bottom, under the MCU edges, next to their pins)
-    ('C23', -2.3, 8.6, 0, True), ('C26', pin['23'][0] - 0.2, 8.4, 0, True), ('C27', pin['23'][0] - 1.4, 7.4, 90, True),
-    ('C24', -7.6, 1.0, 0, True), ('C25', 1.6, 0.4, 0, True), ('C14', 1.6, 3.4, 0, True), ('C22', 2.6, 3.9, 90, True),
-    ('C28', pin['40'][0], -1.6, 90, True), ('C9', -3.0, -2.4, 0, True), ('C15', 1.6, 2.4, 0, True), ('R14', 1.6, 1.4, 0, True),
-    ('L1', -8.8, 1.8, 90, True), ('L2', -7.8, 3.6, 0, True), ('C29', -8.0, 4.8, 0, True),
+    ('C23', 0.7, 5.6, 0, True), ('C26', pin['23'][0] - 0.2, 5.4, 0, True), ('C27', pin['23'][0] - 1.4, 4.4, 90, True),
+    ('C24', -4.6, -2.0, 0, True), ('C25', 4.6, -2.6, 0, True), ('C14', 4.6, 0.4, 0, True), ('C22', 5.6, 0.9, 90, True),
+    ('C28', pin['40'][0], -4.6, 90, True), ('C9', 0.0, -5.4, 0, True), ('C15', 4.6, -0.6, 0, True), ('R14', 4.6, -1.6, 0, True),
+    ('L1', -5.8, -1.2, 90, True), ('L2', -4.8, 0.6, 0, True), ('C29', -5.0, 1.8, 0, True),
     # ESC link support (bottom): series resistors between the MCU east pins and J2, ADC cap
-    ('R20', 3.4, 5.6, 0, True), ('R21', 3.4, 4.6, 0, True), ('R22', 3.4, 6.6, 0, True), ('R23', 3.4, 7.6, 0, True),
-    ('R24', -8.6, 4.2, 0, True), ('C1', 1.8, 7.8, 90, True),
+    ('R20', 6.4, 2.6, 0, True), ('R21', 6.4, 1.6, 0, True), ('R22', 6.4, 3.6, 0, True), ('R23', 6.4, 4.6, 0, True),
+    ('R24', -5.6, 1.2, 0, True), ('C1', 4.8, 4.8, 90, True),
     # rev H: ESC link B series resistors (bottom) between the MCU north / west pins (PA6, PA8-PA10) and J6
-    ('R25', -1.8, 8.6, 0, True), ('R26', -1.8, 9.6, 0, True), ('R28', -0.2, 9.8, 90, True), ('R27', -9.0, 0.6, 0, True),
+    ('R25', -5.4, 8.0, 0, True), ('R26', -5.4, 9.0, 0, True), ('R28', -3.8, 9.2, 90, True), ('R27', -7.0, 8.4, 0, True),
     # IMU / flash / sensor buses (bottom)
-    ('C16', -0.6, -4.4, 0, True), ('C17', 0.6, -2.7, 0, True), ('R38', -2.4, -3.8, 90, True),
-    ('R17', 2.0, -2.0, 90, True), ('R18', 3.0, -2.0, 90, True),
+    ('C16', -0.6, -8.4, 0, True), ('C17', 0.6, -6.7, 0, True), ('R38', -2.4, -7.8, 90, True),
+    ('R17', 2.0, -6.0, 90, True), ('R18', 3.0, -6.0, 90, True),
     ('U10', 5.6, -5.4, 0, True), ('C39', 2.0, -6.6, 90, True), ('R37', 2.0, -5.0, 90, True),
-    ('R15', 5.6, 2.6, 0, True), ('R16', 5.6, 3.6, 0, True),
+    ('R15', 8.6, -0.4, 0, True), ('R16', 8.6, 0.6, 0, True),
     # compass corner (bottom), as rev E
     ('C18', 17.76, 16.68, 0, True), ('C19', 16.28, 16.68, 90, True), ('C20', 13.0, 15.5, 0, True), ('C21', 15.88, 14.45, 0, True),
     # expansion LDO next to J3 (bottom)
@@ -188,27 +186,30 @@ T = [
     ('U7', 6.0, -12.8, 0, False), ('R12', 10.6, -14.6, 0, True), ('R13', 14.6, -10.6, 90, True),
     # rev H: input buck (top, rear-left corner, 21 mm from the board centre: the inductor field stays away from both
     # compasses and from the GPS board connectors above): L3 west, U12 rot 90 (SW / VIN row facing south)
-    ('L3', -14.6, -15.4, 0, False), ('U12', -9.0, -15.6, 90, False), ('C47', -7.0, -18.6, 0, False), ('C49', -10.0, -17.6, 0, False),
-    ('C6', -15.2, -11.4, 0, False), ('C46', -18.6, -14.5, 90, False),
-    ('R47', -7.6, -13.2, 90, False), ('R48', -6.6, -13.2, 90, False),
+    # layout update: input buck on the LEFT edge (old ESC link B spot), no longer in the corner between the rear LEDs D1 / D2;
+    # 24 mm from the board centre, ~40 mm from the compass corner
+    ('L3', -16.9, -4.6, 0, False), ('U12', -12.4, -5.0, 90, False), ('C47', -12.4, -1.9, 180, False), ('C49', -10.6, -2.8, 90, False),
+    ('C6', -16.4, -8.4, 0, False), ('C46', -13.6, -7.6, 0, False),
+    ('R47', -10.4, -6.0, 90, False), ('R48', -9.4, -6.0, 90, False),
     ('C2', -1.6, -12.4, 0, False),                 # VBAT bulk at J2, top (1206 is too tall for the bottom)
     # power path (top, east of the IMU, freed by the rev G buck / charge gate) and LDO (top, south of the IMU)
     ('Q5', 6.6, -4.4, 0, False), ('D9', 5.6, -7.2, 0, False), ('C7', 9.2, -2.0, 90, False), ('R2', 9.0, -5.6, 90, False),
-    ('U5', -1.0, -9.0, 90, False), ('R3', 1.0, -8.6, 90, False), ('R4', 2.0, -8.6, 90, False), ('C8', -1.0, -7.3, 0, False),
+    ('U5', -4.6, -7.8, 90, False), ('R3', -6.4, -8.6, 90, False), ('R4', -6.4, -9.6, 90, False), ('C8', -4.6, -5.8, 0, False),
     ('R42', 0.6, -17.2, 0, True),
     # sensing dividers (bottom)
-    ('R8', 3.8, 9.6, 0, True), ('R9', 3.8, 10.6, 0, True), ('C12', 2.2, 10.2, 90, True),
-    ('R10', -8.6, -2.2, 0, True), ('R11', -8.6, -3.2, 0, True),
+    ('R8', 6.8, 6.6, 0, True), ('R9', 6.8, 7.6, 0, True), ('C12', 5.2, 7.2, 90, True),
+    ('R10', -5.6, -5.2, 0, True), ('R11', -5.6, -6.2, 0, True),
 ]
 ps = pcbnew.SHAPE_POLY_SET(); board.GetBoardPolygonOutlines(ps)
 BP = Polygon([B(ps.Outline(0).CPoint(j)) for j in range(ps.Outline(0).PointCount())]).buffer(-0.3)
 POGO_KEEP = unary_union([Point(pp(t, '1')).buffer(0.5 + 1.0) for t in POGO])
-placed = set(FIXED) | {'J2', 'J6', 'U8'} | set(POGO)
+IMU_VIAS = sbox(-1.0, -6.0, 1.0, -3.9)          # rev A: bottom kept free for the IMU / SPI escape vias (route_h.py)
+placed = set(FIXED) | {'J2', 'U8'} | set(POGO)
 moved = []
 for ref, tu, tv, trot, bot in T:
     fp = FPD[ref]
     occ = unary_union([cyard(FPD[r_]) for r_ in placed if FPD[r_].IsFlipped() == bot and not r_.startswith(('H', 'TP'))] or [Point(99, 99)])
-    keep = unary_union([Point(h).buffer(KEEP_BOT if bot else KEEP_TOP) for h in HOLES] + [ANT] + ([POGO_KEEP] if bot else []))
+    keep = unary_union([Point(h).buffer(KEEP_BOT if bot else KEEP_TOP) for h in HOLES] + [ANT] + ([POGO_KEEP, IMU_VIAS] if bot else []))
     best = None
     for rr in [0.1 * k for k in range(80)]:
         nk = max(1, int(6.28 * rr / 0.1))
@@ -235,13 +236,6 @@ print('not placed:', missing)
 pcbnew.SaveBoard(OUT + '/%s.kicad_pcb' % PROJECT, board)
 
 # ---------------------------------------------------------------- project rules (after SaveBoard)
-pro = json.load(open('/home/claude/outE/ACwing_FC_E.kicad_pro'))
-pro['meta']['filename'] = PROJECT + '.kicad_pro'
-# rev H net classes: battery-voltage nets (up to 6S) 0.3 mm with 0.15 mm clearance
-ns = pro['net_settings']
-hv = dict([c for c in ns['classes'] if c['name'] == 'Power'][0]); hv.update(name='HV', track_width=0.3, clearance=0.15)
-ns['classes'] = [c for c in ns['classes'] if c['name'] != 'HV'] + [hv]
-ns['netclass_patterns'] = [p_ for p_ in ns['netclass_patterns'] if p_['pattern'] not in ('VBAT_F',)] + \
-    [{'netclass': 'Power', 'pattern': 'VREG'}, {'netclass': 'HV', 'pattern': 'VBAT'}, {'netclass': 'HV', 'pattern': 'BUCK_SW'}]
-json.dump(pro, open(OUT + '/%s.kicad_pro' % PROJECT, 'w'), indent=2)
+import shutil
+shutil.copy('/tmp/claude-0/FC_A_good.kicad_pro', OUT + '/%s.kicad_pro' % PROJECT)   # SaveBoard wrote the defaults of the fresh board
 print('footprints', len(FPD), 'nets', len(nets))

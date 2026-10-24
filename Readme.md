@@ -115,6 +115,10 @@ GPS 27.6 / 23.4 USD, Flow 11.1 / 9.4 USD. Check LCSC stock before ordering.
 
 ## Status
 
+**Layout update 2026-10-24 (still rev A):** FC microcontroller at the board centre, ESC link B next to the ELRS port on
+the front edge, input buck moved to the left edge (no longer between the rear LEDs), LED supply kept away from the
+magnetometer (EMI check in the FC README); GPS Qwiic J1 aligned with FC J3.
+
 All four boards are routed with **0 DRC violations and 0 unconnected pads** (KiCad 7.0). They are not built and tested
 yet: see each board README for the bench checks planned before the first order (ERC in KiCad 8/9, power-stage tests,
 land patterns to verify). Firmware is a separate project.
